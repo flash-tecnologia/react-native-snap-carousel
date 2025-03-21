@@ -1,3 +1,7 @@
+## v3.9.2
+
+* Add `index.d.ts` to root folder, updated `package.json#types` field
+
 ## v3.9.1
 
 * Fix for `getNode()` deprecation warning with RN `0.62+` (thanks [@r0b0t3d](https://github.com/r0b0t3d))
