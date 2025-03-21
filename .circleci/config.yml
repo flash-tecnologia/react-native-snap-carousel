@@ -1,0 +1,55 @@
+version: 2.1
+
+aliases:
+  - &cache-key cache-{{ checksum "yarn.lock" }}
+
+executors:
+  default:
+    docker:
+      - image: cimg/node:18.18.0
+    working_directory: ~/project
+
+jobs:
+  install-dependencies:
+    executor: default
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - *cache-key
+      - run:
+          name: Install dependencies
+          command: yarn install --immutable
+      - save_cache:
+          key: *cache-key
+          paths: 
+            - node_modules
+            - .yarn/install-state.gz
+
+  build-package:
+    executor: default
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - *cache-key
+      - run:
+          name: Build package
+          command: yarn npm publish
+
+workflows:
+  build-and-test:
+    jobs:
+      - install-dependencies:
+          context:
+            - STAGING
+      - build-package:
+          requires:
+            - install-dependencies
+          context:
+            - github-publish-context
+            - STAGING
+          filters:
+            branches:
+              only:
+                - master
